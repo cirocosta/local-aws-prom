@@ -1,0 +1,12 @@
+version: '3.2'
+services:
+
+  prometheus:
+    container_name: 'prometheus'
+    restart: 'always'
+    environment:
+      - 'MACHINE_IP=${MACHINE_IP}'
+    ports:
+      - '9090:9090'
+    build: './image'
+

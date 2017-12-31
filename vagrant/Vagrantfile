@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<SCRIPT
+URL=https://github.com/prometheus/node_exporter/releases/download/v0.14.0/node_exporter-0.14.0.linux-amd64.tar.gz
+
+curl \
+    -o /tmp/node_exporter.tgz \
+    -SL \
+    $URL
+    
+tar \
+    xzf /tmp/node_exporter.tgz \
+    -C /tmp/ \
+    --strip-components=1
+
+nohup /tmp/node_exporter &
+SCRIPT
+
+
+Vagrant.configure(2) do |config|
+  config.ssh.username = "ubuntu"
+
+  config.vm.box = "ubuntu/zesty64"
+  config.vm.box_check_update = false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.provision "shell", inline: $script
+
+  config.vm.define "machine1" do |machine1|
+    machine1.vm.network "forwarded_port", guest: 9100, host: 9110
+  end
+
+  config.vm.define "machine2" do |machine2|
+    machine2.vm.network "forwarded_port", guest: 9100, host: 9120
+  end
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 512
+    v.cpus = 1
+  end
+end
