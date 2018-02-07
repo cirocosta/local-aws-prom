@@ -1,0 +1,71 @@
+global:
+  scrape_interval: '5s'
+  evaluation_interval: '5s'
+
+scrape_configs:
+
+  # Collect metrics about the node.
+  # 
+  # These are plain `node_exporter` metrics that
+  # are scrapped to reveal all sorts of machine 
+  # metrics like cpu, inode utilization for each fs, 
+  # memory, iface statistics ...
+  - job_name: 'node'
+
+    relabel_configs:
+
+      # Gather the instance id and use it as the name of the
+      # instance.
+      #
+      # This allows us to not use `ADDR:{PORT` in the instance
+      # names but instead, the instance ID that AWS gives to us.
+      #
+      # In this case, a fake `i-<instance>` identifier.
+      - source_labels:
+        - '__meta_ec2_instance_id'
+        target_label: 'instance'
+
+      # Collect the type of the node and add it as a tag to our
+      # metrics. 
+      #
+      # This allows us to make use of node types in our
+      # queries and dashboards (e.g., if you want to graph the
+      # average CPU usage of a specific machine type like
+      # m4.4xlarge)
+      - source_labels:
+        - '__meta_ec2_tag_tips_ops_node_type'
+        target_label:  'opstips_node_type'
+
+
+    # Machine configuration acting as if we were in aws.
+    #
+    # This has the effect of emulating the AWS labels that
+    # the aws service discovery would give us.
+    #
+    # Note that here I'm settig more information
+    # than I actually use - not all of these are
+    # being used in the relabelling phase so those
+    # not used will be dropped and not persisted.
+    #
+    # Because I'm simulating a two-node scenario
+    # I'm listing only 2 static addresses here with
+    # the desired labels. If you needed to test against more
+    # VMs, this would need to be updated. Probably a better
+    # way would be setting up DNS service discovery with
+    # a custom DNS server locally.
+    static_configs:
+      - targets:
+        - '${MACHINE_IP}:9110'
+        labels:
+          __meta_ec2_tag_tips_ops_environment: 'dev1'
+          __meta_ec2_tag_tips_ops_node_type: 'opstips-fleet-masters'
+          __meta_ec2_instance_type: 't2.medium'
+          __meta_ec2_instance_id: 'i-inst1'
+
+      - targets:
+        - '${MACHINE_IP}:9120'
+        labels:
+          __meta_ec2_tag_tips_ops_environment: 'dev1'
+          __meta_ec2_tag_tips_ops_node_type: 'opstips-fleet-slaves'
+          __meta_ec2_instance_type: 't2.medium'
+          __meta_ec2_instance_id: 'i-inst2'

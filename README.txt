@@ -1,3 +1,4 @@
+
     LOCAL-AWS-PROM
 
         Simulate AWS EC2 Prometheus monitoring locally.
@@ -5,9 +6,10 @@
 
     DEPENDENCIES
         
-        Vagrant:    to create a set of Ubuntu Zesty (17.04) VMs;
+        Vagrant:    to create a set of Ubuntu Artful (17.10) VMs;
         Docker:     to run prometheus (not all that necessary though -
                     can be replaced by prometheus binary).
+
 
     USAGE
 
@@ -18,6 +20,7 @@
         # runs `prometheus` with a custom Docker image that provides
         # environemnt variable replacement to the configuration file
         make run-prometheus
+
 
     MORE
 

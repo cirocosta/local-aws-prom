@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 $script = <<SCRIPT
-URL=https://github.com/prometheus/node_exporter/releases/download/v0.14.0/node_exporter-0.14.0.linux-amd64.tar.gz
+URL=https://github.com/prometheus/node_exporter/releases/download/v0.15.2/node_exporter-0.15.2.linux-amd64.tar.gz
 
 curl \
     -o /tmp/node_exporter.tgz \
@@ -14,14 +14,12 @@ tar \
     -C /tmp/ \
     --strip-components=1
 
-nohup /tmp/node_exporter &
+nohup /tmp/node_exporter 0<&- &>/dev/null &
 SCRIPT
 
 
 Vagrant.configure(2) do |config|
-  config.ssh.username = "ubuntu"
-
-  config.vm.box = "ubuntu/zesty64"
+  config.vm.box = "ubuntu/artful64"
   config.vm.box_check_update = false
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.provision "shell", inline: $script

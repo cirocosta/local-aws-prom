@@ -1,19 +1,35 @@
 #!/bin/bash
 
 set -o errexit
+set -o pipefail
+set -o xtrace
 
-readonly PROMETHEUS_CONFIG_FILE="/etc/prometheus/config/config.yml"
-readonly VAGRANT_CONFIG_FILE="/etc/prometheus/config/vagrant.yml"
+readonly PROMETHEUS_BASE_CONFIG_DIRECTORY="/etc/prometheus/config"
+readonly PROMETHEUS_CONFIG_FILE="$PROMETHEUS_BASE_CONFIG_DIRECTORY/config.yml"
 
 main() {
-  template_configurations "$VAGRANT_CONFIG_FILE"
+  local template_file="$PROMETHEUS_BASE_CONFIG_DIRECTORY/${ENVIRONMENT}.yml"
+  local output_file="$PROMETHEUS_CONFIG_FILE"
+
+  template_configuration_file "$template_file" "$output_file"
   run_prometheus "$@"
 }
 
-template_configurations() {
-  local file=$1
+# Replaces environment variables defined in a
+# template file ($1) and outputs the generated
+# output in a different file ($2).
+template_configuration_file() {
+  local input=$1
+  local output=$2
 
-  cat $file | envsubst -no-unset >$PROMETHEUS_CONFIG_FILE
+  echo "INFO:
+  Templating configuration file.
+
+  INPUT:  $input
+  OUTPUT: $output
+  "
+
+  cat $input | envsubst -no-unset >$output
 }
 
 run_prometheus() {

@@ -1,0 +1,54 @@
+global:
+  scrape_interval: '10s'
+  evaluation_interval: '10s'
+
+scrape_configs:
+
+  # Collect metrics about the node.
+  # 
+  # These are plain `node_exporter` metrics that
+  # are scrapped to reveal all sorts of machine 
+  # metrics like cpu, inode utilization for each fs, 
+  # memory, iface statistics ...
+  # 
+  # In this example I'm not specifying the AWS access token,
+  # secret key and regions because the AWS golang client will
+  # get it from the environment using the default namings, 
+  # leaving us to only need to specify the port to scrape.
+  - job_name: 'node'
+    ec2_sd_configs:
+      - port: 9100
+    relabel_configs:
+
+      # Because we could have multiple environments running
+      # in the same region or some ephemeral machines that
+      # are not meant to be scrapped, filter out those that
+      # do not contain a specific tag.
+      - source_labels:
+        - '__meta_ec2_tag_tips_ops_environment'
+        regex: 'dev1'
+        action: 'keep'
+
+      # Gather the instance id and use it as the name of the
+      # instance.
+      #
+      # This allows us to not use the weird hostname that aws provides
+      # but instead, the instance ID that AWS we can gather from the
+      # service discovery.
+      - source_labels:
+        - '__meta_ec2_instance_id'
+        target_label: 'instance'
+
+      # To enhance the intel and understand better what's going on,
+      # here I also retrieve an extra tag that the machines are 
+      # supposed to have.
+      # 
+      # In this example I set `tips_ops_node_type` to the machine
+      # tag (e.g., m4.4xlarge) but this could be anything.
+      # 
+      # Check `local-aws-prom/infrastructure/main.tf` to see the
+      # tag being set.
+      - source_labels:
+        - '__meta_ec2_tag_tips_ops_node_type'
+        target_label:  'tips_ops_node_type'
+

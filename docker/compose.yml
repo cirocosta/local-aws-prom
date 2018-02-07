@@ -6,6 +6,7 @@ services:
     restart: 'always'
     environment:
       - 'MACHINE_IP=${MACHINE_IP}'
+      - 'ENVIRONMENT=vagrant'
     ports:
       - '9090:9090'
     build: './image'

@@ -1,4 +1,4 @@
-FROM prom/prometheus:v2.0.0 AS prometheus
+FROM prom/prometheus:v2.1.0 AS prometheus
 FROM golang:alpine AS envsubst
 
 RUN set -x && \
@@ -13,7 +13,7 @@ RUN set -x && \
   apk add --update bash ca-certificates
 
 ADD ./entrypoint.sh /usr/local/bin/entrypoint
-ADD ./config /etc/prometheus/config
+ADD ./prometheus/ /etc/prometheus/config
 
 ENTRYPOINT [ "entrypoint" ]
 
